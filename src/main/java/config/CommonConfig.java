@@ -45,11 +45,15 @@ public class CommonConfig {
 		if (dataSource == null) {
 			init(url, userName, password, driverClass);
 		} else {
-			System.out.println("Already initialized..." + (initCount++) + Thread.currentThread().getName()) ;
+			System.out.println("Already initialized..." + Thread.currentThread().getName()) ;
 		}
 	}
 
-	public DataSource getDataSource() {
+	/**
+	 * 
+	 * @return
+	 */
+	public static DataSource getDataSource() {
 		return dataSource;
 	}
 

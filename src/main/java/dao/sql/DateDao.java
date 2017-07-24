@@ -18,8 +18,14 @@ package dao.sql;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * @author debmalyajash
@@ -27,18 +33,152 @@ import java.sql.SQLException;
  */
 public class DateDao {
 	private DataSource dataSource;
-	
+
 	public DateDao(DataSource applicationDataSource) {
 		dataSource = applicationDataSource;
 	}
-	
-	public boolean create(Date dateId,String activityDescription) throws SQLException {
+
+	/**
+	 * C - Create operation.
+	 * 
+	 * @param dateId
+	 *            - date for which activity will be entered.
+	 * @param activityDescription
+	 *            - description of the activity.
+	 * @return true if activity created successfully.
+	 * @throws SQLException
+	 */
+	public boolean create(Date dateId, String activityDescription) throws SQLException {
 		Connection connection = dataSource.getConnection();
-		PreparedStatement preparedStatement = connection.prepareStatement("insert into test.daily values(?,?)");
-		preparedStatement.setDate(1, dateId);
-		preparedStatement.setString(2, activityDescription);
-		return preparedStatement.execute();
-		 
+		PreparedStatement preparedStatement = null;
+		try {
+			preparedStatement = connection.prepareStatement("insert into test.daily values(?,?)");
+			preparedStatement.setDate(1, dateId);
+			preparedStatement.setString(2, activityDescription);
+			return preparedStatement.execute();
+		} finally {
+			if (preparedStatement != null) {
+				preparedStatement.close();
+			}
+		}
+
 	}
-	
+
+	/**
+	 * 
+	 * @param limit - query fetch limit.
+	 * @return JsonArray with date and corresponding activity on that day.
+	 * @throws SQLException
+	 */
+	public JsonArray retrieve(String limit) throws SQLException {
+		JsonArray dateArray = new JsonArray();
+		Connection connection = dataSource.getConnection();
+
+		PreparedStatement preparedStatement = null;
+		if (limit == null || limit.equalsIgnoreCase("All")) {
+			preparedStatement = connection.prepareStatement("select * from test.daily");
+		} else {
+			int size = 100;
+			try {
+				size = Integer.parseInt(limit);
+			} catch (NumberFormatException ignore) {
+
+			}
+			preparedStatement = connection.prepareStatement("select * from test.daily limit " + size);
+		}
+		ResultSet resultSet = null;
+		try {
+			resultSet = preparedStatement.executeQuery();
+			resultSet.first();
+			ResultSetMetaData metaData = resultSet.getMetaData();
+			int colCount = metaData.getColumnCount();
+			while (resultSet.next()) {
+				JsonObject eachRow = new JsonObject();
+				for (int i = 0; i < colCount; i++) {
+					String columnLabel = metaData.getColumnLabel(i + 1);
+					int colType = metaData.getColumnType(i + 1);
+					switch (colType) {
+					case Types.DATE:
+						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getDate(i + 1).toString()));
+						break;
+					case Types.VARCHAR:
+						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getString(i + 1)));
+						break;
+					default:
+						break;
+					}
+				}
+				dateArray.add(eachRow);
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+
+			if (preparedStatement != null) {
+				preparedStatement.close();
+			}
+		}
+		return dateArray;
+	}
+
+	/**
+	 * 
+	 * @param limit - query fetch limit.
+	 * @return JsonArray with date and corresponding activity on that day.
+	 * @throws SQLException
+	 */
+	public JsonArray retrieve(Date dayStamp,String limit) throws SQLException {
+		JsonArray dateArray = new JsonArray();
+		Connection connection = dataSource.getConnection();
+
+		PreparedStatement preparedStatement = null;
+		if (limit == null || limit.equalsIgnoreCase("All")) {
+			preparedStatement = connection.prepareStatement("select * from test.daily where theday = ?");
+		} else {
+			int size = 100;
+			try {
+				size = Integer.parseInt(limit);
+			} catch (NumberFormatException ignore) {
+
+			}
+			preparedStatement = connection.prepareStatement("select * from test.daily where theday = ? limit " + size);
+		}
+		ResultSet resultSet = null;
+		try {
+			preparedStatement.setDate(1, dayStamp);
+			resultSet = preparedStatement.executeQuery();
+			resultSet.first();
+			ResultSetMetaData metaData = resultSet.getMetaData();
+			int colCount = metaData.getColumnCount();
+			while (resultSet.next()) {
+				JsonObject eachRow = new JsonObject();
+				for (int i = 0; i < colCount; i++) {
+					String columnLabel = metaData.getColumnLabel(i + 1);
+					int colType = metaData.getColumnType(i + 1);
+					switch (colType) {
+					case Types.DATE:
+						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getDate(i + 1).toString()));
+						break;
+					case Types.VARCHAR:
+						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getString(i + 1)));
+						break;
+					default:
+						break;
+					}
+				}
+				dateArray.add(eachRow);
+			}
+		} finally {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+
+			if (preparedStatement != null) {
+				preparedStatement.close();
+			}
+		}
+		return dateArray;
+	}
+
 }

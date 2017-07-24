@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.gson.JsonArray;
+
 import dao.sql.DateDao;
 
 /**
@@ -37,12 +39,20 @@ public class CommonConfigTest {
 //	@Test(threadPoolSize=100,invocationCount=100,timeOut=5000)
 	@Test
 	public void testCommonConfig() {
-		CommonConfig commonConfig = new CommonConfig("jdbc:mysql://localhost/mysql", "root", "passw0rd", "com.mysql.jdbc.Driver");
-		Assert.assertNotNull(commonConfig.getDataSource());
-		DateDao dateDao = new DateDao(commonConfig.getDataSource());
+		new CommonConfig("jdbc:mysql://localhost/mysql", "root", "passw0rd", "com.mysql.jdbc.Driver");
+		Assert.assertNotNull(CommonConfig.getDataSource());
+		DateDao dateDao = new DateDao(CommonConfig.getDataSource());
 		Date dateId = new Date(System.currentTimeMillis());
 		try {
-			dateDao.create(dateId, "Testing date entry creation");
+			dateDao.create(dateId, "Testing date entry creation " + System.currentTimeMillis());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.assertFalse(true, "ERR :" + e.getMessage());
+		}
+		
+		try {
+			JsonArray dayActivities = dateDao.retrieve(null);
+			Assert.assertTrue(dayActivities.size() > 1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.assertFalse(true, "ERR :" + e.getMessage());

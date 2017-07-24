@@ -3,6 +3,8 @@ package api;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 
+import config.CommonConfig;
+
 public class APIServer {
 
 	
@@ -11,9 +13,9 @@ public class APIServer {
 		// Create a new Component.
 		Component component = new Component();
 
-		if (args.length < 3) {
+		if (args.length < 5) {
 			System.out.println(
-					"Missing Parameters. Usage java -jar APIServer.jar <URL> <Driver Class> <Username> <Password>");
+					"Missing Parameters. Usage java -jar APIServer.jar <port> <Driver Class> <Username> <Password> <URL>");
 			System.exit(0);
 		}
 
@@ -30,6 +32,7 @@ public class APIServer {
 		component.getServers().add(Protocol.HTTP, port);
 
 		component.getDefaultHost().attach("/api/v1", new APIApplication());
+		CommonConfig commonConfig = new CommonConfig(args[1], args[2], args[3], args[4]);
 
 		// Start the component.
 		component.start();
