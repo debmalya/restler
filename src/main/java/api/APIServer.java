@@ -28,11 +28,16 @@ public class APIServer {
 		} catch (NumberFormatException nfe) {
 			System.err.println("Provided port number'" + args[0] +"' is not a valid port number. Using default port 8111");
 		}
+		
+//		CorsService corsService = new CorsService();         
+//		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
+//		corsService.setAllowedCredentials(true);
 
 		component.getServers().add(Protocol.HTTP, port);
+//		component.getServices().add(corsService);
 
 		component.getDefaultHost().attach("/api/v1", new APIApplication());
-		CommonConfig commonConfig = new CommonConfig(args[1], args[2], args[3], args[4]);
+		new CommonConfig(args[1], args[2], args[3], args[4]);
 
 		// Start the component.
 		component.start();

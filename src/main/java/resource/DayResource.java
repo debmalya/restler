@@ -22,10 +22,13 @@ import java.util.Date;
 
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.engine.header.Header;
+import org.restlet.engine.header.HeaderConstants;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+import org.restlet.util.Series;
 
 import com.google.gson.JsonArray;
 
@@ -92,6 +95,14 @@ public class DayResource extends ServerResource {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// Support for CORS
+		Series<Header> responseHeaders = (Series<Header>)getResponseAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+		if (responseHeaders == null) {
+			responseHeaders = new Series<Header>(Header.class);
+			getResponseAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, responseHeaders);
+		}
+		responseHeaders.add(new Header("Access-Control-Allow-Origin","*"));
 		return representation;
 	}
 
