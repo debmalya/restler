@@ -40,7 +40,7 @@ public class ClientApplication {
 		Client secureClient = new Client(new Context(),Protocol.HTTPS);
 		Series<Parameter> parameters = secureClient.getContext().getParameters();
 		parameters.add("truststorePath","/Users/debmalyajash/git/restler/serverKey.jks");
-		parameters.add("truststorePassword","Raju007%");
+		parameters.add("truststorePassword","passw0rd");
 		parameters.add("truststoretype","JKS");
 		resource = new ClientResource("https://localhost:8113/api/v1/day");
 		DayResource dayResource = resource.wrap(DayResource.class);
