@@ -57,6 +57,13 @@ public class CommonConfigTest {
 			e.printStackTrace();
 			Assert.assertFalse(true, "ERR :" + e.getMessage());
 		}
+		
+		try {
+			Assert.assertTrue(dateDao.delete(new Date(System.currentTimeMillis())));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.assertFalse(true, "ERR :" + e.getMessage());
+		}
 	}
 
 

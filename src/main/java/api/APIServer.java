@@ -1,7 +1,10 @@
 package api;
 
 import org.restlet.Component;
+import org.restlet.Server;
+import org.restlet.data.Parameter;
 import org.restlet.data.Protocol;
+import org.restlet.util.Series;
 
 import config.CommonConfig;
 
@@ -29,13 +32,18 @@ public class APIServer {
 			System.err.println("Provided port number'" + args[0] +"' is not a valid port number. Using default port 8111");
 		}
 		
-//		CorsService corsService = new CorsService();         
-//		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
-//		corsService.setAllowedCredentials(true);
+
 
 		component.getServers().add(Protocol.HTTP, port);
-//		component.getServices().add(corsService);
-
+		
+		// for https
+		Server server = component.getServers().add(Protocol.HTTPS,8113);
+		Series<Parameter> parameters = server.getContext().getParameters();
+		parameters.add("keystorePath","/Users/debmalyajash/git/restler/serverKey.jks");
+		parameters.add("keystorePassword","Raju007%");
+		parameters.add("keystoreType","JKS");
+		parameters.add("keyPassword","Raju007%");
+		
 		component.getDefaultHost().attach("/api/v1", new APIApplication());
 		new CommonConfig(args[1], args[2], args[3], args[4]);
 

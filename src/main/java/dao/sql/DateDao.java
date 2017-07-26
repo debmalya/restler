@@ -22,9 +22,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 /**
@@ -33,6 +33,8 @@ import com.google.gson.JsonPrimitive;
  */
 public class DateDao {
 	private DataSource dataSource;
+
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	public DateDao(DataSource applicationDataSource) {
 		dataSource = applicationDataSource;
@@ -66,7 +68,8 @@ public class DateDao {
 
 	/**
 	 * 
-	 * @param limit - query fetch limit.
+	 * @param limit
+	 *            - query fetch limit.
 	 * @return JsonArray with date and corresponding activity on that day.
 	 * @throws SQLException
 	 */
@@ -93,22 +96,30 @@ public class DateDao {
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int colCount = metaData.getColumnCount();
 			while (resultSet.next()) {
-				JsonObject eachRow = new JsonObject();
+				// JsonObject eachRow = new JsonObject();
+				JsonArray eachRowAsArray = new JsonArray();
 				for (int i = 0; i < colCount; i++) {
-					String columnLabel = metaData.getColumnLabel(i + 1);
+					// String columnLabel = metaData.getColumnLabel(i + 1);
+
 					int colType = metaData.getColumnType(i + 1);
 					switch (colType) {
 					case Types.DATE:
-						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getDate(i + 1).toString()));
+						// eachRow.add("v", new
+						// JsonPrimitive(resultSet.getDate(i + 1).toString()));
+						eachRowAsArray.add(new JsonPrimitive(resultSet.getDate(i + 1).toString()));
 						break;
 					case Types.VARCHAR:
-						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getString(i + 1)));
+						// eachRow.add("v", new
+						// JsonPrimitive(resultSet.getString(i + 1)));
+						eachRowAsArray.add(new JsonPrimitive(resultSet.getString(i + 1)));
 						break;
 					default:
 						break;
 					}
 				}
-				dateArray.add(eachRow);
+				// JsonObject eachRowObject = new JsonObject();
+				// eachRowObject.add("c", eachRowAsArray);
+				dateArray.add(eachRowAsArray);
 			}
 		} finally {
 			if (resultSet != null) {
@@ -124,11 +135,12 @@ public class DateDao {
 
 	/**
 	 * 
-	 * @param limit - query fetch limit.
+	 * @param limit
+	 *            - query fetch limit.
 	 * @return JsonArray with date and corresponding activity on that day.
 	 * @throws SQLException
 	 */
-	public JsonArray retrieve(Date dayStamp,String limit) throws SQLException {
+	public JsonArray retrieve(Date dayStamp, String limit) throws SQLException {
 		JsonArray dateArray = new JsonArray();
 		Connection connection = dataSource.getConnection();
 
@@ -152,16 +164,15 @@ public class DateDao {
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int colCount = metaData.getColumnCount();
 			while (resultSet.next()) {
-				JsonObject eachRow = new JsonObject();
+				JsonArray eachRow = new JsonArray();
 				for (int i = 0; i < colCount; i++) {
-					String columnLabel = metaData.getColumnLabel(i + 1);
 					int colType = metaData.getColumnType(i + 1);
 					switch (colType) {
 					case Types.DATE:
-						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getDate(i + 1).toString()));
+						eachRow.add(new JsonPrimitive(resultSet.getDate(i + 1).toString()));
 						break;
 					case Types.VARCHAR:
-						eachRow.add(columnLabel, new JsonPrimitive(resultSet.getString(i + 1)));
+						eachRow.add(new JsonPrimitive(resultSet.getString(i + 1)));
 						break;
 					default:
 						break;
@@ -181,4 +192,30 @@ public class DateDao {
 		return dateArray;
 	}
 
+	/**
+	 * To delete a date related entry
+	 * 
+	 * @param dateToBeDeleted
+	 *            - specific date whose entry will be deleted.
+	 * @return true if deletion successful, false otherwise.
+	 * @throws SQLException
+	 */
+	public boolean delete(Date dateToBeDeleted) throws SQLException {
+		if (dateToBeDeleted != null) {
+			PreparedStatement psmt = null;
+			try {
+				String dateParameter = sdf.format(dateToBeDeleted);
+				Connection databaseConnection = dataSource.getConnection();
+				psmt = databaseConnection.prepareStatement("delete from test.daily where theday = ?");
+				psmt.setString(1, dateParameter);
+				psmt.execute();
+				return true;
+			} finally {
+				if (psmt != null) {
+					psmt.close();
+				}
+			}
+		}
+		return false;
+	}
 }
