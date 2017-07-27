@@ -54,13 +54,20 @@ public class DateDao {
 		Connection connection = dataSource.getConnection();
 		PreparedStatement preparedStatement = null;
 		try {
+			connection.setAutoCommit(false);
 			preparedStatement = connection.prepareStatement("insert into test.daily values(?,?)");
 			preparedStatement.setDate(1, dateId);
 			preparedStatement.setString(2, activityDescription);
-			return preparedStatement.execute();
+			boolean returnResult = preparedStatement.execute();
+			connection.commit();
+			return returnResult;
 		} finally {
 			if (preparedStatement != null) {
 				preparedStatement.close();
+			}
+			
+			if (connection != null) {
+				connection.close();
 			}
 		}
 
@@ -92,7 +99,6 @@ public class DateDao {
 		ResultSet resultSet = null;
 		try {
 			resultSet = preparedStatement.executeQuery();
-			resultSet.first();
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int colCount = metaData.getColumnCount();
 			while (resultSet.next()) {
@@ -129,6 +135,10 @@ public class DateDao {
 			if (preparedStatement != null) {
 				preparedStatement.close();
 			}
+			
+			if (connection != null) {
+				connection.close();
+			}
 		}
 		return dateArray;
 	}
@@ -160,7 +170,6 @@ public class DateDao {
 		try {
 			preparedStatement.setDate(1, dayStamp);
 			resultSet = preparedStatement.executeQuery();
-			resultSet.first();
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int colCount = metaData.getColumnCount();
 			while (resultSet.next()) {
@@ -188,6 +197,10 @@ public class DateDao {
 			if (preparedStatement != null) {
 				preparedStatement.close();
 			}
+			
+			if (connection != null) {
+				connection.close();
+			}
 		}
 		return dateArray;
 	}
@@ -200,7 +213,7 @@ public class DateDao {
 	 * @return true if deletion successful, false otherwise.
 	 * @throws SQLException
 	 */
-	public boolean delete(Date dateToBeDeleted) throws SQLException {
+	public int delete(Date dateToBeDeleted) throws SQLException {
 		if (dateToBeDeleted != null) {
 			PreparedStatement psmt = null;
 			try {
@@ -208,14 +221,45 @@ public class DateDao {
 				Connection databaseConnection = dataSource.getConnection();
 				psmt = databaseConnection.prepareStatement("delete from test.daily where theday = ?");
 				psmt.setString(1, dateParameter);
-				psmt.execute();
-				return true;
+				System.out.println("dateParameter :" + dateParameter);
+				int updateCount = psmt.executeUpdate();
+				System.out.println("Rows deleted :" + updateCount);
+				return updateCount;
 			} finally {
 				if (psmt != null) {
 					psmt.close();
 				}
 			}
 		}
-		return false;
+		return -1;
+	}
+	
+	/**
+	 * To update a date related entry
+	 * 
+	 * @param dateToBeDeleted
+	 *            - specific date whose entry will be deleted.
+	 * @return true if deletion successful, false otherwise.
+	 * @throws SQLException
+	 */
+	public int update(Date dateToBeDeleted,String activity) throws SQLException {
+		if (dateToBeDeleted != null) {
+			PreparedStatement psmt = null;
+			try {
+				String dateParameter = sdf.format(dateToBeDeleted);
+				Connection databaseConnection = dataSource.getConnection();
+				psmt = databaseConnection.prepareStatement("update test.daily set activity = ? where theday = ?");
+				psmt.setString(1, activity);
+				psmt.setString(2, dateParameter);
+				int updateCount = psmt.executeUpdate();
+				System.out.println("Rows updated :" + updateCount);
+				return updateCount;
+			} finally {
+				if (psmt != null) {
+					psmt.close();
+				}
+			}
+		}
+		return -1;
 	}
 }

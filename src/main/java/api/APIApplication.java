@@ -39,6 +39,7 @@ public class APIApplication extends Application {
 		 router.attach( "/", DayResource.class );
 		 router.attach( "/day", DayResource.class );
 		 router.attach( "/day/{dayStamp}", DayResource.class );
+		 router.attach( "/day/{dayStamp}/{format}", DayResource.class );
 		 router.attach( "/day/{dayStamp}/{activity}", DayResource.class );
 		
 

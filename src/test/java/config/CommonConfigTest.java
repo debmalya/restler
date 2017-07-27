@@ -30,13 +30,13 @@ import dao.sql.DateDao;
  *
  */
 public class CommonConfigTest {
-	
-	
 
 	/**
-	 * Test method for {@link config.CommonConfig#CommonConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}.
+	 * Test method for
+	 * {@link config.CommonConfig#CommonConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+	 * .
 	 */
-//	@Test(threadPoolSize=100,invocationCount=100,timeOut=5000)
+	// @Test(threadPoolSize=100,invocationCount=100,timeOut=5000)
 	@Test
 	public void testCommonConfig() {
 		new CommonConfig("jdbc:mysql://localhost/mysql", "root", "passw0rd", "com.mysql.jdbc.Driver");
@@ -49,7 +49,7 @@ public class CommonConfigTest {
 			e.printStackTrace();
 			Assert.assertFalse(true, "ERR :" + e.getMessage());
 		}
-		
+
 		try {
 			JsonArray dayActivities = dateDao.retrieve(null);
 			Assert.assertTrue(dayActivities.size() > 1);
@@ -59,12 +59,18 @@ public class CommonConfigTest {
 		}
 		
 		try {
-			Assert.assertTrue(dateDao.delete(new Date(System.currentTimeMillis())));
+			Assert.assertTrue(dateDao.update(new Date(System.currentTimeMillis()),"Updated" ) == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Assert.assertFalse(true, "ERR :" + e.getMessage());
+		}
+
+		try {
+			Assert.assertTrue(dateDao.delete(new Date(System.currentTimeMillis()) ) == 1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Assert.assertFalse(true, "ERR :" + e.getMessage());
 		}
 	}
-
 
 }

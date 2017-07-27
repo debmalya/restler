@@ -43,8 +43,8 @@ public class ClientApplication {
 		parameters.add("truststorePassword","passw0rd");
 		parameters.add("truststoretype","JKS");
 		resource = new ClientResource("https://localhost:8113/api/v1/day");
-		DayResource dayResource = resource.wrap(DayResource.class);
-		response = resource.getResponse();
+//		DayResource dayResource = resource.wrap(DayResource.class);
+//		response = resource.getResponse();
 	
 		System.out.println(response + " " + resource.getRequest());
 	}
