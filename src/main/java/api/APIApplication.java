@@ -6,6 +6,7 @@ import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
 import resource.DayResource;
+import resource.URLResource;
 
 public class APIApplication extends Application {
 	
@@ -36,11 +37,10 @@ public class APIApplication extends Application {
 		Router router = new Router(getContext());
 
 		// Defines a route for the resource "list of days,activities"
-		 router.attach( "/", DayResource.class );
-		 router.attach( "/day", DayResource.class );
-		 router.attach( "/day/{dayStamp}", DayResource.class );
-		 router.attach( "/day/{dayStamp}/{format}", DayResource.class );
-		 router.attach( "/day/{dayStamp}/{activity}", DayResource.class );
+		 router.attach( "/", URLResource.class ); 
+		 router.attach( "/url", URLResource.class );
+		 router.attach( "/url/{actualURL}/{alias}", URLResource.class );
+		 router.attach( "/url/find/{shortCode}", URLResource.class );
 		
 
 		return router;
