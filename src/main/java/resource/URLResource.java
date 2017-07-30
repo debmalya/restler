@@ -50,9 +50,9 @@ public class URLResource extends ServerResource {
 	@Override
 	protected void doInit() throws ResourceException {
 		actualURL = (String) getRequest().getAttributes().get("actualURL");
-		shortenURL = (String) getRequest().getAttributes().get("shortenURL");
 		hashCode = (String) getRequest().getAttributes().get("hashCode");
 		alias = (String) getRequest().getAttributes().get("alias");
+		shortenURL = (String) getRequest().getAttributes().get("shortCode");
 	}
 
 	@Override
@@ -93,8 +93,14 @@ public class URLResource extends ServerResource {
 
 		URLDao urlDao = new URLDao(CommonConfig.getDataSource());
 		try {
-
-			JsonArray urlArray = urlDao.retrieve(null);
+			JsonArray urlArray = new JsonArray();
+			System.out.println("shortenURL : " + shortenURL);
+			if (shortenURL != null) {
+				 urlArray = urlDao.retrieveActualURL(shortenURL);
+			} else {
+				 urlArray = urlDao.retrieve(null);
+			}
+			
 			representation = new StringRepresentation(urlArray.toString());
 			representation.setMediaType(MediaType.APPLICATION_JSON);
 

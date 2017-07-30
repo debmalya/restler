@@ -50,7 +50,7 @@ public class URLDao {
 	 * @return true if activity created successfully.
 	 * @throws SQLException
 	 */
-	public boolean create(String actualURL, String shortCode,String alias) throws SQLException {
+	public boolean create(String actualURL, String shortCode, String alias) throws SQLException {
 		Connection connection = dataSource.getConnection();
 		PreparedStatement preparedStatement = null;
 		try {
@@ -67,7 +67,7 @@ public class URLDao {
 			if (preparedStatement != null) {
 				preparedStatement.close();
 			}
-			
+
 			if (connection != null) {
 				connection.close();
 			}
@@ -137,7 +137,7 @@ public class URLDao {
 			if (preparedStatement != null) {
 				preparedStatement.close();
 			}
-			
+
 			if (connection != null) {
 				connection.close();
 			}
@@ -147,69 +147,64 @@ public class URLDao {
 
 	/**
 	 * 
-	 * @param limit
-	 *            - query fetch limit.
+	 * @param shortCode
+	 *            - shortCode for whom actual URL will be retrieved.
 	 * @return JsonArray with date and corresponding activity on that day.
 	 * @throws SQLException
 	 */
-	public JsonArray retrieveActualURL(String limit) throws SQLException {
+	public JsonArray retrieveActualURL(String shortCode) throws SQLException {
 		JsonArray urlArray = new JsonArray();
 		Connection connection = dataSource.getConnection();
 
 		PreparedStatement preparedStatement = null;
-		if (limit == null || limit.equalsIgnoreCase("All")) {
-			preparedStatement = connection.prepareStatement("select * from test.tinyURL");
-		} else {
-			int size = 100;
+		if (shortCode != null) {
+			preparedStatement = connection.prepareStatement("select actualURL from test.tinyURL where shortCode = ?");
+
+			ResultSet resultSet = null;
 			try {
-				size = Integer.parseInt(limit);
-			} catch (NumberFormatException ignore) {
+				preparedStatement.setString(1, shortCode);
+				resultSet = preparedStatement.executeQuery();
+				ResultSetMetaData metaData = resultSet.getMetaData();
+				int colCount = metaData.getColumnCount();
+				while (resultSet.next()) {
+					// JsonObject eachRow = new JsonObject();
+					JsonArray eachRowAsArray = new JsonArray();
+					for (int i = 0; i < colCount; i++) {
+						// String columnLabel = metaData.getColumnLabel(i + 1);
 
-			}
-			preparedStatement = connection.prepareStatement("select * from test.tinyURL limit " + size);
-		}
-		ResultSet resultSet = null;
-		try {
-			resultSet = preparedStatement.executeQuery();
-			ResultSetMetaData metaData = resultSet.getMetaData();
-			int colCount = metaData.getColumnCount();
-			while (resultSet.next()) {
-				// JsonObject eachRow = new JsonObject();
-				JsonArray eachRowAsArray = new JsonArray();
-				for (int i = 0; i < colCount; i++) {
-					// String columnLabel = metaData.getColumnLabel(i + 1);
-
-					int colType = metaData.getColumnType(i + 1);
-					switch (colType) {
-					case Types.DATE:
-						// eachRow.add("v", new
-						// JsonPrimitive(resultSet.getDate(i + 1).toString()));
-						eachRowAsArray.add(new JsonPrimitive(resultSet.getDate(i + 1).toString()));
-						break;
-					case Types.VARCHAR:
-						// eachRow.add("v", new
-						// JsonPrimitive(resultSet.getString(i + 1)));
-						eachRowAsArray.add(new JsonPrimitive(resultSet.getString(i + 1)));
-						break;
-					default:
-						break;
+						int colType = metaData.getColumnType(i + 1);
+						switch (colType) {
+						case Types.DATE:
+							// eachRow.add("v", new
+							// JsonPrimitive(resultSet.getDate(i +
+							// 1).toString()));
+							eachRowAsArray.add(new JsonPrimitive(resultSet.getDate(i + 1).toString()));
+							break;
+						case Types.VARCHAR:
+							// eachRow.add("v", new
+							// JsonPrimitive(resultSet.getString(i + 1)));
+							eachRowAsArray.add(new JsonPrimitive(resultSet.getString(i + 1)));
+							break;
+						default:
+							break;
+						}
 					}
+					// JsonObject eachRowObject = new JsonObject();
+					// eachRowObject.add("c", eachRowAsArray);
+					urlArray.add(eachRowAsArray);
 				}
-				// JsonObject eachRowObject = new JsonObject();
-				// eachRowObject.add("c", eachRowAsArray);
-				urlArray.add(eachRowAsArray);
-			}
-		} finally {
-			if (resultSet != null) {
-				resultSet.close();
-			}
+			} finally {
+				if (resultSet != null) {
+					resultSet.close();
+				}
 
-			if (preparedStatement != null) {
-				preparedStatement.close();
-			}
-			
-			if (connection != null) {
-				connection.close();
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+
+				if (connection != null) {
+					connection.close();
+				}
 			}
 		}
 		return urlArray;
@@ -269,7 +264,7 @@ public class URLDao {
 			if (preparedStatement != null) {
 				preparedStatement.close();
 			}
-			
+
 			if (connection != null) {
 				connection.close();
 			}
@@ -305,7 +300,7 @@ public class URLDao {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * To update a date related entry
 	 * 
@@ -314,7 +309,7 @@ public class URLDao {
 	 * @return true if deletion successful, false otherwise.
 	 * @throws SQLException
 	 */
-	public int update(Date dateToBeDeleted,String activity) throws SQLException {
+	public int update(Date dateToBeDeleted, String activity) throws SQLException {
 		if (dateToBeDeleted != null) {
 			PreparedStatement psmt = null;
 			try {

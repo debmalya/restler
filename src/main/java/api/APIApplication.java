@@ -40,7 +40,7 @@ public class APIApplication extends Application {
 		 router.attach( "/", URLResource.class ); 
 		 router.attach( "/url", URLResource.class );
 		 router.attach( "/url/{actualURL}/{alias}", URLResource.class );
-		 router.attach( "/url/find/{shortCode}", URLResource.class );
+		 router.attach( "/url/{shortCode}", URLResource.class );
 		
 
 		return router;
